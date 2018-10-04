@@ -1,8 +1,16 @@
 ---
 layout: default
-title: Introduce Myself
+title: Sharemeans
 ---
-<div class="blurb">
-	<h1>Hi there, I'm Sharemeans!</h1>
-	<p>I'm best known as the horrible cop from <em>A Touch of Evil</em> Don't trust me. <a href="/about">Read more about my life...</a></p>
-</div>
+<!-- 分页查看近期文章 -->
+<ul class="posts">
+	{% for post in site.posts %}
+	<li class="post-item">
+		<a class="title" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+		<div class="info">
+				<i class="iconfont icon-calendar"></i><span> {{ post.date | date: '%Y-%m-%d' }}</span>
+				<i class="iconfont icon-tag"></i><span> {{ post.tags | array_to_sentence_string}}</span>
+		</div>
+	</li>
+	{% endfor %}
+</ul>

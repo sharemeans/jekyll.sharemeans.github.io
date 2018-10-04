@@ -1,0 +1,383 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<style>
+*{margin:0;padding:0;}
+body {
+	font:13.34px helvetica,arial,freesans,clean,sans-serif;
+	color:black;
+	line-height:1.4em;
+	background-color: #F8F8F8;
+	padding: 0.7em;
+}
+p {
+	margin:1em 0;
+	line-height:1.5em;
+}
+table {
+	font-size:inherit;
+	font:100%;
+	margin:1em;
+}
+table th{border-bottom:1px solid #bbb;padding:.2em 1em;}
+table td{border-bottom:1px solid #ddd;padding:.2em 1em;}
+input[type=text],input[type=password],input[type=image],textarea{font:99% helvetica,arial,freesans,sans-serif;}
+select,option{padding:0 .25em;}
+optgroup{margin-top:.5em;}
+pre,code{font:12px Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;}
+pre {
+	margin:1em 0;
+	font-size:12px;
+	background-color:#eee;
+	border:1px solid #ddd;
+	padding:5px;
+	line-height:1.5em;
+	color:#444;
+	overflow:auto;
+	-webkit-box-shadow:rgba(0,0,0,0.07) 0 1px 2px inset;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;border-radius:3px;
+}
+pre code {
+	padding:0;
+	font-size:12px;
+	background-color:#eee;
+	border:none;
+}
+code {
+	font-size:12px;
+	background-color:#f8f8ff;
+	color:#444;
+	padding:0 .2em;
+	border:1px solid #dedede;
+}
+img{border:0;max-width:100%;}
+abbr{border-bottom:none;}
+a{color:#4183c4;text-decoration:none;}
+a:hover{text-decoration:underline;}
+a code,a:link code,a:visited code{color:#4183c4;}
+h2,h3{margin:1em 0;}
+h1,h2,h3,h4,h5,h6{border:0;}
+h1{font-size:170%;border-top:4px solid #aaa;padding-top:.5em;margin-top:1.5em;}
+h1:first-child{margin-top:0;padding-top:.25em;border-top:none;}
+h2{font-size:150%;margin-top:1.5em;border-top:4px solid #e0e0e0;padding-top:.5em;}
+h3{margin-top:1em;}
+hr{border:1px solid #ddd;}
+ul{margin:1em 0 1em 2em;}
+ol{margin:1em 0 1em 2em;}
+ul li,ol li{margin-top:.5em;margin-bottom:.5em;}
+ul ul,ul ol,ol ol,ol ul{margin-top:0;margin-bottom:0;}
+blockquote{margin:1em 0;border-left:5px solid #ddd;padding-left:.6em;color:#555;}
+dt{font-weight:bold;margin-left:1em;}
+dd{margin-left:2em;margin-bottom:1em;}
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+<title>异步，Promise，generator,async</title>
+
+</head>
+<body>
+<h2>异步，Promise，generator,async</h2>
+
+<h3>javascript线程</h3>
+
+<p> 1.javascript本身是单线程，也是主线程</p>
+
+<p> 2.js主线程有一个任务队列（event loop）</p>
+
+<p> 3.浏览器不是单线程</p>
+
+<blockquote><p>GUI线程(负责页面渲染，不过大多数属于主线程)
+ajax请求线程</p>
+
+<p>浏览器事件触发线程（click），时间触发的时候也会把任务推进主线程的任务队列中，等待主线程执行</p>
+
+<p>浏览器定时器线程，setTimeout在计时结束之后把任务推进任务队列中(问个问题，setTimeout准不准？为什么有写动画会卡顿-任务丢失))</p></blockquote>
+
+<p> 4.GUI线程和js主线程同一个时间只能有一个在执行，</p>
+
+<p> 5.js主线程的代码执行完之后才执行任务队列的代码</p>
+
+<pre><code>var isEnd = false;
+setTimeout(function(){
+    isEnd = true;
+    console.log('isEnd: ', isEnd)
+},0)
+for(var i = 0; i &lt; 10000; i++){
+    console.log('isEnd: ', isEnd)
+}
+console.log('end')
+</code></pre>
+
+<p>个人理解：javascript单线程，但是事件触发机制形成了异步的假象</p>
+
+<h3>同步&amp;异步</h3>
+
+<p>同步代码会按照顺序执行，前面的代码没有执行完毕的话，后面的代码就不会执行。
+异步的代码（ajax和event的回调）在等待返回的时候可以继续执行下面的代码。</p>
+
+<p>很多时候我们需要等数据返回之后才能决定要做什么，可能返回数据之后还要继续ajax请求。。。</p>
+
+<h3>古老的异步编程模式</h3>
+
+<p>1.回调</p>
+
+<p>2.发布/订阅</p>
+
+<p>3.promise</p>
+
+<h4>回调地狱</h4>
+
+<pre><code>                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+</code></pre>
+
+<h3>promise</h3>
+
+<h4>使用串行的风格解决异步回调问题</h4>
+
+<pre><code>somePromise().then(functoin(){
+    // do something
+})
+.then(function(){
+     // do something
+})
+.then(function(){
+     // do something
+})
+</code></pre>
+
+<h4>更灵活处理错误</h4>
+
+<pre><code>somePromise.then(function() {
+ return a.b.c.d();
+}).catch(TypeError, function(e) {
+ //If a is defined, will end up here because
+ //it is a type error to reference property of undefined
+}).catch(ReferenceError, function(e) {
+ //Will end up here if a wasn't defined at all
+}).catch(function(e) {
+ //Generic catch-the rest, error wasn't TypeError nor
+ //ReferenceError
+});
+</code></pre>
+
+<p>三种状态：</p>
+
+<ul>
+<li>pending 等待中，还没有得到结果</li>
+<li>resolved(fulfilled) 得到了想要的结果，可以继续执行</li>
+<li><p>rejected 得到并非所愿的结果，拒绝继续执行</p>
+
+<pre><code>  function fn(num) {
+     return new Promise(function(resolve, reject) {
+         if (typeof num == 'number') {
+             resolve();
+         } else {
+             reject();
+         }
+     }).then(function() {
+         console.log('resolve执行之后的回调');
+     }, function() {
+         console.log('reject执行之后的回调');
+     })
+  }
+</code></pre></li>
+</ul>
+
+
+<p>特点：</p>
+
+<ul>
+<li>异步操作的状态由执行结果决定</li>
+<li>状态可以保持，即使状态在resolved和reject的情况下，也能添加回调且立即执行。</li>
+</ul>
+
+
+<p>简易版的promise实现：</p>
+
+<pre><code>function Promise(fn) {
+    var state = 'pending',
+        value = null,
+        deferreds = [];
+
+    this.then = function (onFulfilled) {
+        // 如果状态为起始状态，则添加到任务队列
+        if (state === 'pending') {
+            deferreds.push(onFulfilled);
+            return this;
+        }
+        // 否则立即执行
+        onFulfilled(value);
+        return this;
+    };
+
+    function resolve(newValue) {
+        value = newValue;
+        state = 'fulfilled';
+        setTimeout(function () {
+            deferreds.forEach(function (deferred) {
+                deferred(value);
+            });
+        }, 0);
+    }
+
+    fn(resolve);
+}
+
+function getUserId() {
+    return new Promise(function (resolve) {
+        resolve(123);
+    });
+}
+
+getUserId().then(function (id) {
+    console.log('do sth with', id);
+});
+</code></pre>
+
+<p>缺点：
+then太多，代码分散</p>
+
+<pre><code>new Promise(function(resolve. reject){
+    doSomething1();// 获取品牌列表
+    resolve();
+}).then(function(resolve. reject){
+    doSomething2();// 根据品牌列表获取型号列表
+    resolve();
+}).then(function(resolve. reject){
+    doSomething3();// 根据型号列表获取颜色列表
+    resolve();
+})
+</code></pre>
+
+<h4>promise通常用法</h4>
+
+<pre><code>apiGet(url, data) {
+  return new Promise((resolve, reject) =&gt; {
+    axios.get(url, data).then((response) =&gt; {
+      resolve(response.data)
+    }, (response) =&gt; {
+      reject(response)
+      _g.closeGlobalLoading()
+      bus.$message({
+        message: '请求超时，请检查网络',
+        type: 'warning'
+      })
+    })
+  })
+}
+
+
+this.apiGet('admin/groups').then((res) =&gt; {
+   this.handelResponse(res, (data) =&gt; {
+     this.groupOptions = data
+   })
+ })
+</code></pre>
+
+<h3>Generator函数</h3>
+
+<p>函数暂停执行的一种方法，es6语法，特点：
+1.函数名称前有＊
+2.需要暂停的地方有yield关键字
+3.函数执行后返回的是遍历器iterator，不是执行结果，看成指针</p>
+
+<pre><code>function* gen(x){
+  var y = yield x + 2;
+  return y;
+}
+
+var g = gen(1);
+g.next() // { value: 3, done: false }
+g.next(2) // { value: 2, done: true } 
+</code></pre>
+
+<h4>genarator和promise结合</h4>
+
+<pre><code>var fetch = doAjax(url){
+    var data = {}
+    return new Promise(function(resolve, reject){
+        $.ajax({
+            url: url,
+            data: data,
+            success: function(ret){
+                resolve(ret.data)
+            },
+            error: function(err){
+                reject(err)
+            }
+        })
+    })
+};
+
+function* gen(url1, url2){
+    var url = 'https://api.github.com/users/github'
+    var result1 = yield fetch(url1)
+    var result2 = yield fetch(result1)
+
+    var result3 = result1 + result2
+    console.log(result3)
+}
+/**begin**/
+var _g = gen('/index.php/getList1', '/index.php/getList1');
+// 获取url1的返回值
+_g.next().value.then(function(result1){
+    // 把url1的返回值作为输入，返回值赋值给result2
+    _g.next(result1).value.then(function(result2){
+        _g.next(result2);
+    })
+})  
+/**end**/
+</code></pre>
+
+<p>这样写的好处是，当存在多个异步调用有依赖关系时，关键逻辑代码组合在一起可读性更强，只不过generator需要手动一步一步的往前执行，所以衍生出async/await</p>
+
+<h4>async/await和promise结合</h4>
+
+<p>async/await和generator可以看成是一样的，*替换成async，yield替换成await。只不过，不需要我们写上面那一段代码，因为async/await已经帮我们处理了，我们只需要在await后面的那个方法返回promise对象就行了。</p>
+
+<h3>参考文档</h3>
+
+<p><a href="http://www.jianshu.com/p/f8b052c71550">深入理解Promise</a></p>
+
+<p><a href="http://www.jianshu.com/p/063f7e490e9a">Javascript 中的神器——Promise</a></p>
+
+<p><a href="http://huli.logdown.com/posts/292655-javascript-promise-generator-async-es6">Promise, generator, async與ES6</a></p>
+
+<p><a href="http://www.ruanyifeng.com/blog/2015/04/generator.html">Generator 函数的含义与用法</a></p>
+
+<p><a href="http://www.ruanyifeng.com/blog/2015/05/async.html">async 函数的含义和用法</a></p>
+</body>
+</html>

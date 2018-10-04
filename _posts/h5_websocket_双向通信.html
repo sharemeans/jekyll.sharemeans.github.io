@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<style>
+*{margin:0;padding:0;}
+body {
+	font:13.34px helvetica,arial,freesans,clean,sans-serif;
+	color:black;
+	line-height:1.4em;
+	background-color: #F8F8F8;
+	padding: 0.7em;
+}
+p {
+	margin:1em 0;
+	line-height:1.5em;
+}
+table {
+	font-size:inherit;
+	font:100%;
+	margin:1em;
+}
+table th{border-bottom:1px solid #bbb;padding:.2em 1em;}
+table td{border-bottom:1px solid #ddd;padding:.2em 1em;}
+input[type=text],input[type=password],input[type=image],textarea{font:99% helvetica,arial,freesans,sans-serif;}
+select,option{padding:0 .25em;}
+optgroup{margin-top:.5em;}
+pre,code{font:12px Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;}
+pre {
+	margin:1em 0;
+	font-size:12px;
+	background-color:#eee;
+	border:1px solid #ddd;
+	padding:5px;
+	line-height:1.5em;
+	color:#444;
+	overflow:auto;
+	-webkit-box-shadow:rgba(0,0,0,0.07) 0 1px 2px inset;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;border-radius:3px;
+}
+pre code {
+	padding:0;
+	font-size:12px;
+	background-color:#eee;
+	border:none;
+}
+code {
+	font-size:12px;
+	background-color:#f8f8ff;
+	color:#444;
+	padding:0 .2em;
+	border:1px solid #dedede;
+}
+img{border:0;max-width:100%;}
+abbr{border-bottom:none;}
+a{color:#4183c4;text-decoration:none;}
+a:hover{text-decoration:underline;}
+a code,a:link code,a:visited code{color:#4183c4;}
+h2,h3{margin:1em 0;}
+h1,h2,h3,h4,h5,h6{border:0;}
+h1{font-size:170%;border-top:4px solid #aaa;padding-top:.5em;margin-top:1.5em;}
+h1:first-child{margin-top:0;padding-top:.25em;border-top:none;}
+h2{font-size:150%;margin-top:1.5em;border-top:4px solid #e0e0e0;padding-top:.5em;}
+h3{margin-top:1em;}
+hr{border:1px solid #ddd;}
+ul{margin:1em 0 1em 2em;}
+ol{margin:1em 0 1em 2em;}
+ul li,ol li{margin-top:.5em;margin-bottom:.5em;}
+ul ul,ul ol,ol ol,ol ul{margin-top:0;margin-bottom:0;}
+blockquote{margin:1em 0;border-left:5px solid #ddd;padding-left:.6em;color:#555;}
+dt{font-weight:bold;margin-left:1em;}
+dd{margin-left:2em;margin-bottom:1em;}
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+<title>H5 双向即时通信（websocket）</title>
+
+</head>
+<body>
+<h1>H5 双向即时通信（websocket）</h1>
+
+<h2>场景</h2>
+
+<h3>双向通信&amp;&amp;多端同步</h3>
+
+<p>说一个现实场景（微信网页版）</p>
+
+<h3>long polling</h3>
+
+<p><img src="h5_websocket/3.png" alt="" /></p>
+
+<p>分析微信这样处理的优缺点：
+优点：实现起来简单
+缺点：浪费带宽，服务器需要保留连接而占用一个 线程</p>
+
+<h3>websocket</h3>
+
+<p>作用：</p>
+
+<blockquote><p>允许服务器端与客户端进行全双工（full-duplex）的通信</p></blockquote>
+
+<p><img src="h5_websocket/4.png" alt="" /></p>
+
+<pre><code>客户端：
+- “Connection: Upgrade”就表示浏览器通知服务器，如果可以，就升级到webSocket协议
+- Upgrade:websocket 头信息表示将通信协议从HTTP/1.1转向该项所指定的协议
+- Origin用于验证浏览器域名是否在服务器许可的范围内
+- Sec-WebSocket-Key则是用于握手协议的密钥
+服务端：
+- “Connection: Upgrade”通知浏览器，需要改变协议
+-  浏览器用"Sec-WebSocket-Accept"和浏览器请求带上的Sec-WebSocket-Key连接并验证是否是目标服务器进行的回应（具体怎么验证可能涉及到加密问题）。
+</code></pre>
+
+<h4>websocket和http的区别与联系</h4>
+
+<blockquote><p>http连接断开后服务器将不会记得之前请求了什么返回了什么，但是websocket发送请求之后不会断开连接。所以服务器收到请求的时候知道这个请求属于谁。</p>
+
+<p>http只能是客户端主动请求服务端</p>
+
+<p>websocket协议在第一次握手连接时，通过http协议告诉服务器“我要切换为ws连接”</p>
+
+<p>如果服务器支持ws协议，则返回101</p></blockquote>
+
+<p>chrome devTool 分析</p>
+
+<blockquote><p>ws连接并没有中断</p>
+
+<p>Frames表示客户端和服务器之间的数据传输历史记录</p></blockquote>
+
+<p>1-1 demo演示</p>
+
+<p>多－1 demo演示</p>
+
+<h4>兼容性</h4>
+
+<p><a href="http://caniuse.com/#search=websocket">浏览器兼容性查看</a></p>
+
+<h4>websocket安全</h4>
+
+<blockquote><p>防攻击：</p>
+
+<blockquote><p>以sec开头的header浏览器脚本无法获取，脚本也不能设置，攻击者无法伪造websocket请求，所以本身有一定的防攻击性</p>
+
+<p>CORS不适用于websocket协议，所以，也容易进行跨站攻击，但是websocket的第一次握手会传递origin，服务端需要做好origin校验(两个项目代码交叉演示)，不过origin头部可以被伪造，应该需要加上令牌验证之类的认证措施。</p></blockquote></blockquote>
+
+<p>其它demo链接：</p>
+
+<p><a href="https://www.qcloud.com/community/article/585387001484793629?fromSource=gwzcw.93407.93407.93407">你画我猜</a></p>
+</body>
+</html>

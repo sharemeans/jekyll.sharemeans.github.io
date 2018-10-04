@@ -1,8 +1,18 @@
 ---
 layout: default
 ---
-<h1>{{ page.title }}</h1>
-<p class="meta">{{ page.date | date_to_string }}</p>
+<style>
+  .container {
+    padding: 20px;
+    background: #fff;
+    overflow: scroll;
+  }
+  .post {
+    margin-top: 20px;
+  }
+</style>
+<h1 class="title">{{ page.title }}</h1>
+<div><i class="iconfont icon-calendar"></i><span> {{ page.date | date: '%Y-%m-%d' }}</span></div>
 
 <div class="post">
   {{ content }}

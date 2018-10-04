@@ -1,1 +1,11 @@
 name: Sharemeans
+markdown: kramdown
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      author: "Sharemeans"
+      layout: "post"
+      
