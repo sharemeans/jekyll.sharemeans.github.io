@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .highlight {
   background: #ffffff;
 }
@@ -312,6 +313,42 @@
 }
 
 /* Literal.Number.Integer.Long */
+h1 {
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* 标题的前后间距 */
+h2 {
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* 标题的前后间距 */
+h3 {
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* 标题的前后间距 */
+h4 {
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+
+/* 标题的前后间距 */
+h5 {
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+
+/* 标题的前后间距 */
+h6 {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+/* 标题的前后间距 */
 blockquote {
   position: relative;
 }
