@@ -1,5 +1,5 @@
 ---
-tags: utf-8,unicode,编码
+tags: [utf-8,unicode,编码]
 ---
 ### ASCII，unicode和utf-8编码
 
